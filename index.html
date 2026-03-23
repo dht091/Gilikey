@@ -377,14 +377,9 @@ input[type=text]::placeholder { color: var(--text-chiplab); }
 <script>
 // ── Theme ─────────────────────────────────────────────────────────────────
 (function initTheme() {
-  const saved = localStorage.getItem('gilikey-theme');
-  let theme;
-  if (saved) {
-    theme = saved;                          // dùng lần cài đặt gần nhất
-  } else {
-    theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  applyTheme(theme, false);
+  // Mặc định: light. Dùng lại setting đã lưu nếu có.
+  const saved = localStorage.getItem('gilikey-theme') || 'light';
+  applyTheme(saved, false);
 })();
 
 function applyTheme(theme, animate = true) {
@@ -407,15 +402,8 @@ function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme') || 'light';
   const next    = current === 'dark' ? 'light' : 'dark';
   applyTheme(next);
-  localStorage.setItem('gilikey-theme', next);   // ghi nhớ
+  localStorage.setItem('gilikey-theme', next);
 }
-
-// Lắng nghe thay đổi theme hệ thống (chỉ áp dụng nếu chưa có saved preference)
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-  if (!localStorage.getItem('gilikey-theme')) {
-    applyTheme(e.matches ? 'dark' : 'light');
-  }
-});
 
 // ── Clock ─────────────────────────────────────────────────────────────────
 function pad(n) { return String(n).padStart(2, '0'); }
