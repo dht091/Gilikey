@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1565C0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GiliSoft Key">
+<title>GiliSoft Password Generator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    background: linear-gradient(145deg, #0D47A1 0%, #1565C0 40%, #1976D2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 40px 0;
+  }
+
+  /* ── Header ── */
+  .header {
+    width: 100%;
+    background: rgba(0,0,0,0.2);
+    backdrop-filter: blur(10px);
+    padding: 18px 24px 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .header-icon {
+    width: 42px; height: 42px;
+    background: #FFD600;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    flex-shrink: 0;
+  }
+  .header-text h1 { color: #fff; font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
+  .header-text p  { color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 2px; }
+
+  /* ── Card ── */
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 28px 24px;
+    margin: 24px 16px 0;
+    width: calc(100% - 32px);
+    max-width: 460px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  }
+
+  /* ── Labels ── */
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1565C0;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+
+  /* ── Inputs ── */
+  .input-wrap { position: relative; margin-bottom: 20px; }
+  input[type=text], select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #E3EAF6;
+    border-radius: 12px;
+    font-size: 16px;
+    color: #1A237E;
+    background: #F8FAFF;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input[type=text]:focus, select:focus {
+    border-color: #1565C0;
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.12);
+    background: #fff;
+  }
+  input[type=text]::placeholder { color: #B0BEC5; }
+
+  /* Custom select arrow */
+  .select-wrap { position: relative; margin-bottom: 20px; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+    color: #1565C0; font-size: 16px; pointer-events: none;
+  }
+  .select-wrap select { padding-right: 40px; cursor: pointer; }
+
+  /* ── Row layout ── */
+  .row { display: flex; gap: 12px; }
+  .row .input-wrap, .row .select-wrap { flex: 1; margin-bottom: 0; }
+
+  /* ── Divider ── */
+  .divider {
+    height: 1px; background: #E8EEF8;
+    margin: 20px 0;
+  }
+
+  /* ── Button ── */
+  .btn-generate {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #1565C0, #1976D2);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(21,101,192,0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-top: 4px;
+  }
+  .btn-generate:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(21,101,192,0.3); }
+
+  /* ── Result ── */
+  .result-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    margin: 16px 16px 0;
+    width: calc(100% - 32px);
+    max-width: 460px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    display: none;
+  }
+  .result-card.show { display: block; animation: slideUp 0.3s ease; }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-section { margin-bottom: 20px; }
+  .result-section:last-child { margin-bottom: 0; }
+
+  .result-label {
+    font-size: 11px; font-weight: 700; color: #90A4AE;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+  }
+
+  .result-value {
+    background: #F0F4FF;
+    border: 1.5px solid #C5CAE9;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .result-value.password {
+    background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+    border-color: #A5D6A7;
+  }
+
+  .result-text {
+    font-family: 'Courier New', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1A237E;
+    word-break: break-all;
+    flex: 1;
+  }
+  .result-value.password .result-text { color: #2E7D32; font-size: 18px; }
+
+  .copy-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 6px; border-radius: 8px;
+    color: #7986CB; font-size: 20px;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .copy-btn:active { background: rgba(121,134,203,0.15); }
+  .copy-btn.copied { color: #43A047; }
+
+  /* ── Info row ── */
+  .info-row {
+    display: flex; gap: 10px; margin-top: 16px;
+  }
+  .info-chip {
+    flex: 1;
+    background: #F5F5F5;
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .info-chip .chip-label { font-size: 10px; color: #9E9E9E; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .info-chip .chip-value { font-size: 13px; color: #424242; font-weight: 700; margin-top: 2px; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #323232; color: #fff;
+    padding: 12px 24px; border-radius: 24px;
+    font-size: 14px; font-weight: 500;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    white-space: nowrap; z-index: 999;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Clock ── */
+  .clock-bar {
+    width: calc(100% - 32px); max-width: 460px;
+    margin: 16px 0 0;
+    display: flex; gap: 10px;
+  }
+  .clock-chip {
+    flex: 1; background: rgba(255,255,255,0.15);
+    border-radius: 12px; padding: 10px 14px;
+    backdrop-filter: blur(8px);
+  }
+  .clock-chip .cl { font-size: 10px; color: rgba(255,255,255,0.65); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .clock-chip .cv { font-size: 14px; color: #fff; font-weight: 700; margin-top: 2px; font-family: 'Courier New', monospace; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-icon">🔑</div>
+  <div class="header-text">
+    <h1>GiliSoft Key Generator</h1>
+    <p>Temporary password tool</p>
+  </div>
+</div>
+
+<!-- Clock bar -->
+<div class="clock-bar">
+  <div class="clock-chip">
+    <div class="cl">Local Time</div>
+    <div class="cv" id="localClock">--:--:--</div>
+  </div>
+  <div class="clock-chip">
+    <div class="cl">UTC Time</div>
+    <div class="cv" id="utcClock">--:--:--</div>
+  </div>
+  <div class="clock-chip">
+    <div class="cl">Unix Minute</div>
+    <div class="cv" id="minuteClock">--------</div>
+  </div>
+</div>
+
+<!-- Input Card -->
+<div class="card">
+  <div class="input-wrap">
+    <label>Machine Code</label>
+    <input type="text" id="machineCode" placeholder="VD: 000000ab" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+  </div>
+
+  <div class="select-wrap">
+    <label>Offset giờ (cộng vào thời gian hiện tại)</label>
+    <select id="hourOffset">
+      <option value="0">+0 giờ — Thời điểm hiện tại</option>
+      <option value="1">+1 giờ</option>
+      <option value="2">+2 giờ</option>
+      <option value="3">+3 giờ</option>
+      <option value="4">+4 giờ</option>
+      <option value="5">+5 giờ</option>
+    </select>
+  </div>
+
+  <button class="btn-generate" onclick="generate()">
+    <span>⚡</span> Generate Password
+  </button>
+</div>
+
+<!-- Result Card -->
+<div class="result-card" id="resultCard">
+  <div class="result-section">
+    <div class="result-label">Machine Code</div>
+    <div class="result-value">
+      <span class="result-text" id="outMachine">—</span>
+      <button class="copy-btn" onclick="copyText('outMachine', this)" title="Copy">⧉</button>
+    </div>
+  </div>
+
+  <div class="result-section">
+    <div class="result-label">GUI Password</div>
+    <div class="result-value password">
+      <span class="result-text" id="outPassword">—</span>
+      <button class="copy-btn" onclick="copyText('outPassword', this)" title="Copy">⧉</button>
+    </div>
+  </div>
+
+  <div class="info-row">
+    <div class="info-chip">
+      <div class="chip-label">Offset</div>
+      <div class="chip-value" id="infoOffset">+0h</div>
+    </div>
+    <div class="info-chip">
+      <div class="chip-label">Effective Time</div>
+      <div class="chip-value" id="infoTime">—</div>
+    </div>
+    <div class="info-chip">
+      <div class="chip-label">Unix Minute</div>
+      <div class="chip-value" id="infoMinute">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">Đã copy!</div>
+
+<script>
+// ── Clock ─────────────────────────────────────────────────────────────────
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('localClock').textContent =
+    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  document.getElementById('utcClock').textContent =
+    `${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())}`;
+  const minute = Math.floor(now.getTime() / 1000 / 60);
+  document.getElementById('minuteClock').textContent = minute;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Core algorithm ─────────────────────────────────────────────────────────
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function encodeForGUI(cltHex) {
+  const plain = cltHex + '0';            // 17 ASCII bytes
+  const key   = 'vinsmartfuture';
+  const cipher = new Uint8Array(plain.length);
+  for (let i = 0; i < plain.length; i++)
+    cipher[i] = plain.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+  let bin = '';
+  cipher.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+
+async function generateGUIPassword(machineCode, offsetHours) {
+  const offsetSec = offsetHours * 3600;
+  const ts        = Math.floor(Date.now() / 1000) + offsetSec;
+  const minute    = Math.floor(ts / 60);
+  const input     = `${machineCode}:${minute}:30`;
+  const fullHex   = await sha256Hex(input);
+  const cltHex    = fullHex.substring(0, 16);
+  return { guiPw: encodeForGUI(cltHex), minute, ts };
+}
+
+// ── Generate ───────────────────────────────────────────────────────────────
+async function generate() {
+  const mc     = document.getElementById('machineCode').value.trim().toLowerCase();
+  const offset = parseInt(document.getElementById('hourOffset').value);
+
+  if (!mc) {
+    document.getElementById('machineCode').focus();
+    document.getElementById('machineCode').style.borderColor = '#E53935';
+    setTimeout(() => document.getElementById('machineCode').style.borderColor = '', 1200);
+    return;
+  }
+
+  const btn = document.querySelector('.btn-generate');
+  btn.textContent = '⏳ Generating...';
+  btn.disabled = true;
+
+  try {
+    const { guiPw, minute, ts } = await generateGUIPassword(mc, offset);
+
+    document.getElementById('outMachine').textContent  = mc;
+    document.getElementById('outPassword').textContent = guiPw;
+    document.getElementById('infoOffset').textContent  = `+${offset}h`;
+    document.getElementById('infoMinute').textContent  = minute;
+
+    // Effective time display
+    const effDate = new Date(ts * 1000);
+    document.getElementById('infoTime').textContent =
+      `${pad(effDate.getUTCHours())}:${pad(effDate.getUTCMinutes())} UTC`;
+
+    document.getElementById('resultCard').classList.add('show');
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } finally {
+    btn.innerHTML = '<span>⚡</span> Generate Password';
+    btn.disabled = false;
+  }
+}
+
+// ── Copy ───────────────────────────────────────────────────────────────────
+function copyText(id, btn) {
+  const text = document.getElementById(id).textContent;
+
+  // Method 1: Clipboard API (works on HTTPS)
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => onCopied(btn)).catch(() => fallbackCopy(text, btn));
+    return;
+  }
+  // Method 2: execCommand fallback (works on local file://)
+  fallbackCopy(text, btn);
+}
+
+function fallbackCopy(text, btn) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  ta.setSelectionRange(0, 99999); // mobile
+  try {
+    document.execCommand('copy');
+    onCopied(btn);
+  } catch(e) {
+    showToast('Không copy được — hãy giữ tay lên text để copy thủ công');
+  }
+  document.body.removeChild(ta);
+}
+
+function onCopied(btn) {
+  btn.textContent = '✓';
+  btn.classList.add('copied');
+  showToast('Đã copy vào clipboard!');
+  setTimeout(() => { btn.textContent = '⧉'; btn.classList.remove('copied'); }, 2000);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── Enter key ──────────────────────────────────────────────────────────────
+document.getElementById('machineCode').addEventListener('keydown', e => {
+  if (e.key === 'Enter') generate();
+});
+</script>
+</body>
+</html>
