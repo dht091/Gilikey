@@ -1,4 +1,4 @@
-const CACHE = 'gilikey-v1';
+const CACHE = 'gilikey-v2';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
